@@ -3,3 +3,29 @@ title: "progress-report-seb46051"
 output: html_document
 ---
 
+```{r}
+#install necessary packages
+library(rvest)
+library(tidyverse)
+```
+
+get the data from site
+```{r}
+url<- "https://www.baseball-reference.com/awards/hof_2026.shtml"
+html<- read_html(url)
+tables<- html_table(html)
+
+#inspect table of interest
+head(tables[[1]])
+str(tables[[1]])
+
+#fix column names
+dat<- tables[[1]]
+col_names<- dat[1,]
+colnames(dat)<- col_names
+dat<- dat[-1,]
+head(dat)
+
+
+```
+
