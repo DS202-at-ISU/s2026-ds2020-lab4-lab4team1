@@ -1,0 +1,66 @@
+---
+title: "progress_report-favourforchu"
+author: "Favour Forchu"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(rvest)
+library(Lahman)
+library(readr)
+
+```
+
+In this lab, I scraped Hall of Fame voting data for 2026 from Baseball Reference, cleaned the data, and compared it to the Lahman HOF table.
+
+
+//Scrapping the data
+```{r}
+url <- "https://www.baseball-reference.com/awards/hof_2026.shtml"
+html <- read_html(url)
+tables <- html_table(html)
+length(tables)
+```
+
+//Choose HOF table
+```{r}
+data <- tables[[1]]
+head(data, 3)
+```
+
+//Fix Columns
+```{r}
+actual_col_names <- data[1, ]
+colnames(data) <- actual_col_names
+data <- data[-1, ]
+head(data, 3)
+```
+
+//Date cleaning
+```{r}
+hof_2026 <- data %>% select(Name, Votes, `%vote`) %>% mutate(year = 2026, votes = as.numeric(Votes), percent_vote = readr::parse_number(`%vote`), inducted = ifelse(percent_vote >= 75, "Y", "N")) %>% select(candidate_name = Name, year, votes, percent_vote, inducted)
+
+head(hof_2026)
+```
+
+
+//Save Clean data
+```{r}
+write_csv(hof_2026, "HallOfFame_2026.csv")
+```
+
+// Compare to lahman
+```{r}
+lahman_2026 <- HallOfFame %>% filter(yearID == 2026)
+lahman_2026
+```
+
+```{r}
+hof_2026 %>% count(inducted)
+lahman_2026 %>% count(votedBy, inducted)
+```
+
+The scraped Baseball data and Lahman data don't match row-for-row because the two sources organize Hall of Fame information differently. Baseball Reference shows the full BBWAA ballot, while Lahman stores official voting records and may include different voting bodies.
