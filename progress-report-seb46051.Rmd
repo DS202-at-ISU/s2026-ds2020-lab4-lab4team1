@@ -28,50 +28,31 @@ colnames(dat)<- col_names
 dat<- dat[-1,]
 head(dat)
 
-#change the necessary variables
+#change and add the necessary variables
 dat$Rk<- as.numeric(dat$Rk)
-dat$YoB<- parse_number(dat$YoB)
 dat$Votes<- as.numeric(dat$Votes)
 dat$`%vote`<- parse_number(dat$`%vote`)
-dat$HOFm<- as.numeric(dat$HOFm)
-dat$HOFs<- as.numeric(dat$HOFs)
-dat$Yrs<- as.numeric(dat$Yrs)
-dat$WAR<- as.numeric(dat$WAR)
-dat$WAR7<- as.numeric(dat$WAR7)
-dat$JAWS<- as.numeric(dat$JAWS)
-dat$Jpos<- as.numeric(dat$Jpos)
-dat$G<- as.numeric(dat$G)
-dat$AB<- as.numeric(dat$AB)
-dat$R<- as.numeric(dat$R)
-dat$H<- as.numeric(dat$H)
-dat$HR<- as.numeric(dat$HR)
-dat$RBI<- as.numeric(dat$RBI)
-dat$SB<- as.numeric(dat$SB)
-dat$BB<- as.numeric(dat$BB)
-dat$BA<- as.numeric(dat$BA)
-dat$OBP<- as.numeric(dat$OBP)
-dat$SLG<- as.numeric(dat$SLG)
-dat$OPS<- as.numeric(dat$OPS)
-dat$`OPS+`<- as.numeric(dat$`OPS+`)
-dat$W<- as.numeric(dat$W)
-dat$L<- as.numeric(dat$L)
-dat$ERA<- as.numeric(dat$ERA)
-dat$`ERA+`<- as.numeric(dat$`ERA+`)
-dat$WHIP<- as.numeric(dat$WHIP)
-dat$G<- as.numeric(dat$G)
-dat$GS<- as.numeric(dat$GS)
-dat$SV<- as.numeric(dat$SV)
-dat$IP<- as.numeric(dat$IP)
-dat$H<- as.numeric(dat$H)
-dat$HR<- as.numeric(dat$HR)
-dat$BB<- as.numeric(dat$BB)
-dat$SO<- as.numeric(dat$SO)
-dat$`Pos Summary`<- as.numeric(dat$`Pos Summary`)
-
+dat$year<- rep(2026, nrow(dat))
+dat$inducted<- ifelse(dat$Votes>=319, "Y", "N")
 
 #remove any unwanted characters
 dat$Name<- gsub("X-", "", dat$Name)
 
+dat<- dat %>%
+  select(Rk, Name, Votes, `%vote`, year, inducted)
 dat
+
+lahman_2026 <- HallOfFame %>% 
+  filter(yearID == 2026)
+
+
+dat %>% 
+  count(inducted)
+
+lahman_2026 %>% 
+  count(votedBy, inducted)
+
+write.csv(dat, file="2026_dat.csv", row.names = FALSE)
+
 ```
 
