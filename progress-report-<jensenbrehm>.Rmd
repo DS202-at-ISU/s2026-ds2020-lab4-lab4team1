@@ -1,0 +1,95 @@
+---
+title: "progress-report-<jensenbrehm>"
+author: "JensenBrehm"
+date: "2026-04-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rvest)
+library(Lahman)
+library(dplyr)
+library(tidyverse)
+```
+
+```{r}
+url <- "https://www.baseball-reference.com/awards/hof_2026.shtml"
+html <- read_html(url)
+```
+
+```{r}
+tables <- html %>%
+  html_table(fill = TRUE)
+tables
+
+BW <- tables[[1]]
+
+colnames(BW) <- BW[1, ]
+BW <- BW[-1, ]
+
+str(BW)
+
+```
+
+
+```{r}
+#Clean HOF
+Hof_Clean <- HallOfFame %>%
+  left_join(People, by = "playerID") %>%
+  filter(yearID == 2026) %>%
+  mutate(
+    `%Vote` = votes / ballots,
+    inducted = inducted == "Y"
+  ) %>%
+  select(
+    Name = nameGiven,
+    Year = yearID,
+    Votes = votes,
+    `%Vote`,
+    Inducted = inducted
+    )
+
+  
+```
+
+```{r}
+#Clean BW
+
+BW_Clean <- BW %>%
+  select(
+    Name, 
+    Votes,
+    `%Vote` = `%vote`,
+  ) %>%
+  mutate(
+    `%Vote` = parse_number(`%Vote`),
+    Inducted = `%Vote` >= 75,
+    Year = 2026
+  )
+```
+
+```{r}
+#Join BW and HOF
+final26 <- rbind(BW_Clean, Hof_Clean)
+final26
+
+lahman_2026 <- HallOfFame %>% 
+  filter(yearID == 2026)
+BW_Clean %>% 
+  count(Inducted)
+lahman_2026 %>% 
+  count(votedBy, inducted)
+```
+
+```{r}
+#Export as a csv
+readr::write_csv(BW_Clean, file="DS2020_Lab4.csv")
+```
+
+
+
+
+
+
+
